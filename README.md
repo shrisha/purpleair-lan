@@ -1,6 +1,6 @@
 # PurpleAir LAN
 
-A native iOS app for monitoring local PurpleAir sensors on your network, providing real-time air quality data without requiring internet connectivity.
+A native iOS app for monitoring a PurpleAir sensor on your network, providing real-time air quality data without requiring internet connectivity.
 
 ## Features
 
