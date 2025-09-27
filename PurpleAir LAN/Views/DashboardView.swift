@@ -2,12 +2,15 @@ import SwiftUI
 
 struct DashboardView: View {
     let hostname: String
-    
+
     // Service for fetching sensor data
     @StateObject private var purpleAirService = PurpleAirService()
-    
+
     // UserDefaults for resetting configuration
     @AppStorage("sensorHostname") private var sensorHostname = ""
+
+    // State to control showing configuration
+    @State private var showingConfiguration = false
     
     // Timer for auto-refresh
     @State private var refreshTimer: Timer?
@@ -49,7 +52,7 @@ struct DashboardView: View {
                     .disabled(purpleAirService.isLoading)
                     
                     // Settings button
-                    Button(action: resetConfiguration) {
+                    Button(action: { showingConfiguration = true }) {
                         Image(systemName: "gearshape")
                     }
                 }
@@ -65,6 +68,19 @@ struct DashboardView: View {
         }
         .onDisappear {
             stopAutoRefresh()
+        }
+        .sheet(isPresented: $showingConfiguration) {
+            NavigationView {
+                ConfigurationView()
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Cancel") {
+                                showingConfiguration = false
+                            }
+                        }
+                    }
+            }
         }
     }
 }
@@ -195,10 +211,6 @@ private extension DashboardView {
         }
     }
     
-    /// Reset configuration to go back to setup
-    func resetConfiguration() {
-        sensorHostname = ""
-    }
     
     /// Start auto-refresh timer (every 30 seconds)
     func startAutoRefresh() {
