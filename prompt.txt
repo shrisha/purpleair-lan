@@ -1,0 +1,40 @@
+ I want to create an iOS app to monitor my local PurpleAir sensor. Here's what I need:
+
+  Design Requirements:
+  - Clean, modern SwiftUI interface
+  - Dashboard with 4 main tiles showing: Temperature, Humidity, Pressure, and Air Quality
+  - Configuration screen where users can enter their sensor's hostname or IP address
+  - Test connection functionality before saving
+  - Auto-refresh every 30 seconds
+  - Pull-to-refresh support
+
+  Here's the JSON sample output from a PurpleAir sensor:
+  {
+    "api_version": "V1.0.11-0.0.41",
+    "time_stamp": 1700000000,
+    "data_time_stamp": 1700000000,
+    "location_type": 0,
+    "latitude": 37.7749,
+    "longitude": -122.4194,
+    "altitude": 100,
+    "place": "San Francisco, CA",
+    "geo": "PurpleAir-12345",
+    "current_temp_f": 68.5,
+    "current_humidity": 55.2,
+    "current_dewpoint_f": 50.1,
+    "pressure": 30.12,
+    "pm2.5_aqi": 45,
+    "pm2.5_cf_1": 12.3,
+    "pm2.5_atm": 11.8
+  }
+
+  AQI Color Coding Guidelines:
+  - 0-50 (Good): Green
+  - 51-100 (Moderate): Yellow
+  - 101-150 (Unhealthy for Sensitive Groups): Orange
+  - 151-200 (Unhealthy): Red
+  - 201-300 (Very Unhealthy): Purple
+  - 301+ (Hazardous): Maroon
+
+  The app should validate hostname/IP input, handle network errors gracefully, and persist the sensor configuration
+  between app launches.
