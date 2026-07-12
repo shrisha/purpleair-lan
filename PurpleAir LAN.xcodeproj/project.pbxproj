@@ -40,6 +40,11 @@
 			path = "PurpleAir LAN";
 			sourceTree = "<group>";
 		};
+		AA0000000000000000000001 /* PurpleAir LANTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "PurpleAir LANTests";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				9D8B08992E405EBB00541770 /* PurpleAir LAN */,
+				AA0000000000000000000001 /* PurpleAir LANTests */,
 				9D8B08982E405EBB00541770 /* Products */,
 				9D8B08FD2E407FE800541770 /* README.md */,
 			);
@@ -123,6 +129,9 @@
 			);
 			dependencies = (
 				9D8B08A62E405EBD00541770 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AA0000000000000000000001 /* PurpleAir LANTests */,
 			);
 			name = "PurpleAir LANTests";
 			packageProductDependencies = (
