@@ -10,15 +10,22 @@ struct PanelView: View {
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var editingHostname = false
     @State private var hostnameDraft = ""
+    @State private var sceneVisible = false
 
     var body: some View {
         ZStack {
-            AmbientSceneView(
-                aqi: monitor.phase == .home ? Double(monitor.lastData?.airQualityReading?.aqi ?? 25) : 25,
-                pm25: monitor.phase == .home ? (monitor.lastData?.airQualityReading?.correctedPM25 ?? 0) : 0,
-                latitude: monitor.lastData?.latitude,
-                longitude: monitor.lastData?.longitude
-            )
+            Group {
+                if sceneVisible {
+                    AmbientSceneView(
+                        aqi: monitor.phase == .home ? Double(monitor.lastData?.airQualityReading?.aqi ?? 25) : 25,
+                        pm25: monitor.phase == .home ? (monitor.lastData?.airQualityReading?.correctedPM25 ?? 0) : 0,
+                        latitude: monitor.lastData?.latitude,
+                        longitude: monitor.lastData?.longitude
+                    )
+                } else {
+                    Color(red: 0.03, green: 0.04, blue: 0.08) // hidden window: render nothing animated
+                }
+            }
             .overlay(Color.black.opacity(monitor.phase == .home ? 0 : 0.2))
 
             VStack(spacing: 0) {
@@ -32,9 +39,12 @@ struct PanelView: View {
         }
         .frame(width: 340, height: 440)
         .environment(\.colorScheme, .dark)
+        .background(WindowVisibilityObserver { visible in
+            sceneVisible = visible
+            if visible { monitor.panelOpened() }   // re-fires on every reopen, unlike onAppear
+        })
         .onAppear {
             launchAtLogin = SMAppService.mainApp.status == .enabled
-            monitor.panelOpened()
         }
     }
 
@@ -280,5 +290,49 @@ struct PanelView: View {
         monitor.hostname = trimmed
         editingHostname = false
         monitor.hostnameDidChange()
+    }
+}
+
+/// MenuBarExtra's window is hidden, not destroyed, when the panel closes —
+/// report its occlusion so the scene can stop rendering entirely.
+private struct WindowVisibilityObserver: NSViewRepresentable {
+    let onChange: (Bool) -> Void
+
+    func makeNSView(context: Context) -> TrackingView {
+        let view = TrackingView()
+        view.onChange = onChange
+        return view
+    }
+
+    func updateNSView(_ nsView: TrackingView, context: Context) {
+        nsView.onChange = onChange
+    }
+
+    final class TrackingView: NSView {
+        var onChange: ((Bool) -> Void)?
+        private var observation: NSObjectProtocol?
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let observation { NotificationCenter.default.removeObserver(observation) }
+            observation = nil
+            guard let window else {
+                onChange?(false)
+                return
+            }
+            onChange?(window.occlusionState.contains(.visible))
+            observation = NotificationCenter.default.addObserver(
+                forName: NSWindow.didChangeOcclusionStateNotification,
+                object: window,
+                queue: .main
+            ) { [weak self] note in
+                guard let window = note.object as? NSWindow else { return }
+                self?.onChange?(window.occlusionState.contains(.visible))
+            }
+        }
+
+        deinit {
+            if let observation { NotificationCenter.default.removeObserver(observation) }
+        }
     }
 }

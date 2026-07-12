@@ -15,6 +15,7 @@ public struct ReachabilityPolicy {
 
     public enum Action: Equatable {
         case probe(after: TimeInterval)
+        case suspend
         case idle
     }
 
@@ -28,7 +29,7 @@ public struct ReachabilityPolicy {
         switch event {
         case .pathUnsatisfied, .slept:
             phase = .suspended
-            return .idle
+            return .suspend
 
         case .pathSatisfied, .woke:
             guard phase == .suspended else { return .idle }

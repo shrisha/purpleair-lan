@@ -88,11 +88,13 @@ final class SensorMonitor: ObservableObject {
         phase = policy.phase
         isStale = policy.phase == .home && policy.consecutiveFailures > 0
         switch action {
-        case .idle:
+        case .suspend:
             scheduler?.invalidate()
             scheduler = nil
             probeTask?.cancel()
             probeTask = nil
+        case .idle:
+            break
         case .probe(let delay):
             schedule(after: delay)
         }

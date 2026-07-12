@@ -50,7 +50,7 @@ import Foundation
 @Test func sleepSuspendsAndDropsInFlightResults() {
     var p = ReachabilityPolicy()
     _ = p.handle(.probeSucceeded)
-    #expect(p.handle(.slept) == .idle)
+    #expect(p.handle(.slept) == .suspend)
     #expect(p.phase == .suspended)
     #expect(p.handle(.probeSucceeded) == .idle)   // in-flight result during suspension
     #expect(p.phase == .suspended)
@@ -69,9 +69,17 @@ import Foundation
 @Test func pathLossSuspendsPathGainResumes() {
     var p = ReachabilityPolicy()
     _ = p.handle(.probeSucceeded)
-    #expect(p.handle(.pathUnsatisfied) == .idle)
+    #expect(p.handle(.pathUnsatisfied) == .suspend)
     #expect(p.phase == .suspended)
     #expect(p.handle(.pathSatisfied) == .probe(after: 2.5))
+    #expect(p.phase == .searching)
+}
+
+@Test func initialPathCallbackDoesNotKillStartupProbe() {
+    var p = ReachabilityPolicy()
+    _ = p.handle(.kicked)                       // startup probe scheduled
+    // NWPathMonitor's initial .satisfied callback arrives while searching:
+    #expect(p.handle(.pathSatisfied) == .idle)  // must be a no-op, NOT a teardown
     #expect(p.phase == .searching)
 }
 
