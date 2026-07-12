@@ -236,6 +236,7 @@ struct DashboardView: View {
     // MARK: data
 
     private func refresh() async {
+        guard !purpleAirService.isLoading else { return }
         await purpleAirService.fetchSensorData(from: hostname)
         switch purpleAirService.state {
         case .loaded(let data):
