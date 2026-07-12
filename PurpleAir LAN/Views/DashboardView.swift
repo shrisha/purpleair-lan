@@ -140,15 +140,19 @@ struct DashboardView: View {
         VStack(spacing: 8) {
             if let reading = data.airQualityReading {
                 PMCard(reading: reading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             HStack(alignment: .top, spacing: 8) {
                 if let humidity = data.displayHumidityPct, let dew = data.displayDewPointF {
                     HumidityCard(humidityPct: humidity, dewPointF: dew)
+                        .frame(maxHeight: .infinity)
                 }
                 if let pressure = data.pressure {
                     PressureCard(hPa: pressure, trend: pressureStore.trend)
+                        .frame(maxHeight: .infinity)
                 }
             }
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
