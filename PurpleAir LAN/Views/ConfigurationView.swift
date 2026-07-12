@@ -1,4 +1,5 @@
 import SwiftUI
+import PurpleAirKit
 
 struct ConfigurationView: View {
     // Store hostname in UserDefaults for persistence

@@ -1,5 +1,6 @@
 // PurpleAir LAN/Views/DashboardView.swift
 import SwiftUI
+import PurpleAirKit
 
 struct DashboardView: View {
     let hostname: String
