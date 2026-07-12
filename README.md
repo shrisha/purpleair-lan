@@ -4,9 +4,9 @@ Native apps for monitoring a PurpleAir sensor **on your own network** — no clo
 API keys, no internet required. An iOS "living wallpaper" dashboard and an
 ultra-low-power macOS menu bar widget, sharing one Swift core.
 
-| iOS — living wallpaper | iOS — setup | macOS — PurpleAir Bar |
+| iOS — smoke event | iOS — clean night | macOS — PurpleAir Bar |
 |:---:|:---:|:---:|
-| ![iOS dashboard at night](docs/images/ios-dashboard-night.png) | ![iOS setup screen](docs/images/ios-setup.png) | ![macOS menu bar panel](docs/images/macos-panel.png) |
+| ![iOS dashboard during a smoke event](docs/images/ios-dashboard-smoke.png) | ![iOS dashboard on a clean night](docs/images/ios-dashboard-night.png) | ![macOS menu bar panel](docs/images/macos-panel.png) |
 
 ## The apps
 
