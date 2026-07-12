@@ -21,6 +21,7 @@ final class SensorMonitor: ObservableObject {
 
     private var policy = ReachabilityPolicy()
     private var scheduler: NSBackgroundActivityScheduler?
+    private var probeTask: Task<Void, Never>?
     private let pathMonitor = NWPathMonitor()
     private var lastPathStatus: NWPath.Status?
     private var started = false
@@ -90,16 +91,23 @@ final class SensorMonitor: ObservableObject {
         case .idle:
             scheduler?.invalidate()
             scheduler = nil
+            probeTask?.cancel()
+            probeTask = nil
         case .probe(let delay):
             schedule(after: delay)
         }
+    }
+
+    private func launchProbe() {
+        probeTask?.cancel()
+        probeTask = Task { await self.probe() }
     }
 
     private func schedule(after delay: TimeInterval) {
         scheduler?.invalidate()
         scheduler = nil
         guard delay > 0 else {
-            Task { await self.probe() }
+            launchProbe()
             return
         }
         let activity = NSBackgroundActivityScheduler(identifier: "com.sr.PurpleAir-Bar.poll")
@@ -109,7 +117,7 @@ final class SensorMonitor: ObservableObject {
         activity.qualityOfService = .utility
         activity.schedule { [weak self] completion in
             Task { @MainActor [weak self] in
-                await self?.probe()
+                self?.launchProbe()
                 completion(.finished)
             }
         }
@@ -125,6 +133,7 @@ final class SensorMonitor: ObservableObject {
         }
         do {
             let (data, response) = try await session.data(from: url)
+            guard !Task.isCancelled, policy.phase != .suspended else { return }
             guard let http = response as? HTTPURLResponse, 200...299 ~= http.statusCode else {
                 apply(.probeFailed)
                 return
@@ -137,6 +146,11 @@ final class SensorMonitor: ObservableObject {
             }
             apply(.probeSucceeded)
         } catch {
+            // A cancelled probe was superseded (new kick/suspend); the superseding
+            // path owns the next schedule — report nothing.
+            guard !Task.isCancelled, !(error is CancellationError) else { return }
+            if let urlError = error as? URLError, urlError.code == .cancelled { return }
+            guard policy.phase != .suspended else { return }
             apply(.probeFailed)
         }
     }
