@@ -64,11 +64,18 @@ final class SensorMonitor: ObservableObject {
         apply(.kicked)
     }
 
-    /// Panel just opened: refresh if what we have is stale for a live glance.
+    /// Panel just opened: user-initiated freshness. Kick while searching (skip
+    /// the backoff), or while home with stale/absent data. No-op when suspended.
     func panelOpened() {
-        guard phase == .home else { return }
-        guard let lastUpdate, Date().timeIntervalSince(lastUpdate) > 45 else { return }
-        apply(.kicked)
+        switch phase {
+        case .suspended:
+            return
+        case .searching:
+            apply(.kicked)
+        case .home:
+            guard lastUpdate.map({ Date().timeIntervalSince($0) > 45 }) ?? true else { return }
+            apply(.kicked)
+        }
     }
 
     // MARK: internals
