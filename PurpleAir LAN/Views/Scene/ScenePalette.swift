@@ -19,6 +19,8 @@ struct RGB: Equatable {
 
     func mixed(with other: RGB, amount: Double) -> RGB {
         let t = min(max(amount, 0), 1)
+        if t == 0 { return self }
+        if t == 1 { return other }
         return RGB(r: r + (other.r - r) * t, g: g + (other.g - g) * t, b: b + (other.b - b) * t)
     }
 
