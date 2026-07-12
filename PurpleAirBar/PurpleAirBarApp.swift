@@ -3,12 +3,16 @@ import PurpleAirKit
 
 @main
 struct PurpleAirBarApp: App {
+    init() {
+        SensorMonitor.shared.start()
+    }
+
     var body: some Scene {
         MenuBarExtra {
-            Text("PurpleAir Bar — placeholder")
+            Text("Panel arrives in the next task")
                 .padding()
         } label: {
-            Image(systemName: "aqi.medium")
+            MenuBarLabel()
         }
         .menuBarExtraStyle(.window)
     }
