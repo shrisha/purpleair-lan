@@ -3,7 +3,7 @@ import Network
 import PurpleAirKit
 
 /// Thin integration shell around ReachabilityPolicy: owns the path monitor,
-/// sleep/wake observers, the coalesced one-shot scheduler, and the URL session.
+/// sleep/wake observers, the tolerant one-shot poll timer, and the URL session.
 /// Energy contract: zero scheduled work while suspended; one ~2 KB LAN fetch
 /// per minute while home; backoff-capped probes while searching.
 @MainActor
@@ -20,7 +20,7 @@ final class SensorMonitor: ObservableObject {
     let pressureStore = PressureHistoryStore()
 
     private var policy = ReachabilityPolicy()
-    private var scheduler: NSBackgroundActivityScheduler?
+    private var pollTimer: Timer?
     private var probeTask: Task<Void, Never>?
     private let pathMonitor = NWPathMonitor()
     private var lastPathStatus: NWPath.Status?
@@ -96,8 +96,8 @@ final class SensorMonitor: ObservableObject {
         isStale = policy.phase == .home && policy.consecutiveFailures > 0
         switch action {
         case .suspend:
-            scheduler?.invalidate()
-            scheduler = nil
+            pollTimer?.invalidate()
+            pollTimer = nil
             probeTask?.cancel()
             probeTask = nil
         case .idle:
@@ -113,24 +113,24 @@ final class SensorMonitor: ObservableObject {
     }
 
     private func schedule(after delay: TimeInterval) {
-        scheduler?.invalidate()
-        scheduler = nil
+        pollTimer?.invalidate()
+        pollTimer = nil
         guard delay > 0 else {
             launchProbe()
             return
         }
-        let activity = NSBackgroundActivityScheduler(identifier: "com.sr.PurpleAir-Bar.poll")
-        activity.repeats = false
-        activity.interval = delay
-        activity.tolerance = max(delay * 0.25, 1)   // let the OS coalesce wakeups
-        activity.qualityOfService = .utility
-        activity.schedule { [weak self] completion in
+        // A run-loop Timer, not NSBackgroundActivityScheduler: the scheduler
+        // treats the interval as a maintenance hint and defers indefinitely
+        // once the system goes idle (observed 20+ min stalls). A tolerant
+        // timer still coalesces wakeups but keeps a user-visible cadence.
+        let timer = Timer(timeInterval: delay, repeats: false) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.launchProbe()
-                completion(.finished)
             }
         }
-        scheduler = activity
+        timer.tolerance = max(delay * 0.25, 1)
+        RunLoop.main.add(timer, forMode: .common)
+        pollTimer = timer
     }
 
     private func probe() async {
