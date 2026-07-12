@@ -1,196 +1,118 @@
 # PurpleAir LAN
 
-A native iOS app for monitoring a PurpleAir sensor on your network, providing real-time air quality data without requiring internet connectivity.
+Native apps for monitoring a PurpleAir sensor **on your own network** — no cloud, no
+API keys, no internet required. An iOS "living wallpaper" dashboard and an
+ultra-low-power macOS menu bar widget, sharing one Swift core.
 
-## Features
+| iOS — living wallpaper | iOS — setup | macOS — PurpleAir Bar |
+|:---:|:---:|:---:|
+| ![iOS dashboard at night](docs/images/ios-dashboard-night.png) | ![iOS setup screen](docs/images/ios-setup.png) | ![macOS menu bar panel](docs/images/macos-panel.png) |
 
-- **Local Network Monitoring**: Connect directly to PurpleAir sensors on your local network
-- **Real-time Data**: Monitor temperature, humidity, pressure, and air quality index (AQI)
-- **Auto-refresh**: Sensor data updates automatically every 30 seconds
-- **Visual Indicators**: Color-coded tiles for quick understanding of environmental conditions
-- **Persistent Configuration**: Save your sensor hostname/IP for quick access
-- **Pull-to-refresh**: Manual refresh with pull gesture
-- **Error Handling**: Clear error messages and retry options
+## The apps
 
-## Screenshots
+### PurpleAir LAN (iOS)
 
-The app features a clean, modern interface with:
-- **Setup Screen**: Easy sensor configuration with connection testing
-- **Dashboard**: Real-time environmental data in an intuitive grid layout
-- **Status Indicators**: Connection status and last update timestamps
+A full-screen ambient dashboard in the iOS Weather app's design language — the
+wallpaper *is* the metric:
 
-## Requirements
+- The animated background palette follows the six EPA AQI bands (serene blue →
+  golden haze → amber → smoky brown → maroon → oxblood), blended day/night by a
+  solar model driven by the sensor's own coordinates, with twilight warmth at the
+  horizon. Haze motes thicken with PM2.5; stars come out on clean nights.
+- Hero AQI numeral + category, temperature · dew point line, and frosted glass
+  cards: PM2.5 with the official EPA color scale bar and health guidance, humidity
+  with comfort band, pressure with a persisted 3-hour trend.
+- Ambient behavior: the screen stays awake, chrome fades after 5 s idle and
+  returns on tap, data refreshes every 30 s with smooth numeric transitions.
 
-- iOS 15.0+
-- Xcode 14.0+
-- Swift 5.7+
-- PurpleAir sensor on your local network
+### PurpleAir Bar (macOS 15+)
 
-## Installation
+A polite menu bar housemate. When your Mac can reach the sensor it shows an
+EPA-colored dot and the AQI (`● 22`); click it for a 340 pt miniature of the living
+wallpaper. When the sensor is unreachable it fades to a dim ghost glyph and goes
+quiet.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/PurpleAir-LAN.git
-   cd PurpleAir-LAN
-   ```
+- **Near-zero footprint by design:** one coalesced ~2 KB LAN fetch per minute while
+  home (`NSBackgroundActivityScheduler`, `.utility` QoS), network-change-triggered
+  probing with exponential backoff (capped at 5 min) while away, zero scheduled
+  work while asleep or off-network, and no rendering while the panel is closed.
+  Measured: 0.0 % CPU at idle.
+- Footer controls: launch at login, change sensor address inline, open the
+  sensor's own web page, quit.
 
-2. Open `PurpleAir LAN.xcodeproj` in Xcode
+## Honest numbers
 
-3. Build and run the project on your iOS device or simulator
+Both apps correct the sensor's known biases instead of displaying raw values:
 
-## Configuration
+- **AQI** is computed in-app: A/B laser channel mean → EPA/Barkjohn correction →
+  the **May 2024** EPA PM2.5 breakpoints (Good is 0–9.0 µg/m³ now). The firmware's
+  own AQI field predates that revision and is never shown. A footer notes when the
+  two laser channels disagree (EPA QC rule).
+- **Temperature** −8 °F and **humidity** +4 % (documented board self-heating
+  biases); **dew point** recomputed from the corrected pair via the Magnus formula.
+- EPA category colors are the official AirNow values, and color is never the only
+  signal — the numeral and category word always accompany it.
 
-### Finding Your PurpleAir Sensor
-
-1. Ensure your iOS device is connected to the same Wi-Fi network as your PurpleAir sensor
-2. Find your sensor's local IP address:
-   - Check your router's admin panel for connected devices
-   - Look for devices named "PurpleAir" or similar
-   - Common IP formats: `192.168.1.xxx` or `10.0.0.xxx`
-
-### Setting Up the App
-
-1. Launch the app
-2. Enter your sensor's hostname or IP address (e.g., `192.168.1.100` or `purple.air`)
-3. Tap "Test Connection" to verify connectivity
-4. Tap "Save & Continue" to proceed to the dashboard
-
-## Data Display
-
-The app displays four key environmental metrics:
-
-- **Temperature**: Current temperature in Fahrenheit with color coding
-- **Humidity**: Relative humidity percentage with comfort indicators
-- **Pressure**: Atmospheric pressure in millibars
-- **Air Quality**: AQI value with EPA standard color coding and quality descriptions
-
-### AQI Quality Levels
-
-- **0-50 (Green)**: Good
-- **51-100 (Yellow)**: Moderate
-- **101-150 (Orange)**: Unhealthy for Sensitive Groups
-- **151-200 (Red)**: Unhealthy
-- **201-300 (Purple)**: Very Unhealthy
-- **301+ (Maroon)**: Hazardous
-
-## Architecture
-
-The app follows the MVVM pattern with SwiftUI:
-
-### Core Components
-
-- **ContentView**: Main navigation controller
-- **ConfigurationView**: Sensor setup and connection testing
-- **DashboardView**: Real-time data display
-- **PurpleAirService**: Network service for API communication
-- **PurpleAirData**: Data model with display formatting
-
-### Key Features
-
-- **@AppStorage**: Persistent sensor configuration
-- **Async/Await**: Modern networking with proper error handling
-- **Timer-based Refresh**: Automatic data updates
-- **State Management**: Reactive UI updates with SwiftUI
-
-## API Integration
-
-The app communicates with PurpleAir sensors using their local JSON API:
+## Repo structure
 
 ```
-http://[sensor-ip]/json?live=true
+purpleair-lan/
+├── PurpleAir.xcworkspace        # open this — both apps + the package
+├── PurpleAirKit/                # shared SwiftPM package (iOS 18 / macOS 15)
+│   ├── Sources/PurpleAirKit/    #   EPA pipeline, models, palettes, solar model,
+│   │                            #   scene view, scale bar, reachability policy
+│   └── Tests/PurpleAirKitTests/ #   53 unit tests — run with `swift test`
+├── PurpleAir LAN/               # iOS app (views only; core comes from the kit)
+├── PurpleAir LAN.xcodeproj
+├── PurpleAirBar/                # macOS menu bar app
+├── PurpleAirBar.xcodeproj
+└── docs/                        # design specs, plans, screenshots
 ```
 
-### Response Format
+## Building
 
-The sensor returns JSON data including:
-- Environmental readings (temperature, humidity, pressure)
-- Air quality measurements (PM2.5, AQI)
-- Sensor metadata (location, version, connectivity)
+Requirements: Xcode 26, a PurpleAir sensor on your LAN.
+
+```bash
+git clone https://github.com/shrisha/purpleair-lan.git
+cd purpleair-lan
+open PurpleAir.xcworkspace
+```
+
+- **iOS**: select the *PurpleAir LAN* scheme → run on device/simulator. On first
+  launch enter the sensor's hostname or IP (e.g. `purpleair.lan` or
+  `192.168.1.100` — no `http://` needed), test, save.
+- **macOS**: select the *PurpleAir Bar* scheme → run. The widget appears in the
+  menu bar (no Dock icon); set the sensor address from the gear menu if the
+  default `purpleair.lan` doesn't resolve on your network. Enable *Launch at
+  Login* from the same menu.
+- **Core tests**: `cd PurpleAirKit && swift test` — no simulator needed.
+
+## How it talks to the sensor
+
+Plain local HTTP, the sensor's own JSON endpoint:
+
+```
+http://<sensor-hostname-or-ip>/json     # firmware's 2-minute average
+```
+
+Finding the address: check your router's client list for a device named
+`PurpleAir-xxxx`. Some routers register it in local DNS (that's why
+`purpleair.lan` works); otherwise use the IP. Sensors don't advertise over
+Bonjour, so the address is the one thing you configure.
 
 ## Troubleshooting
 
-### Common Issues
-
-**"Cannot find sensor at this address"**
-- Verify the IP address or hostname is correct
-- Ensure your device is on the same network as the sensor
-- Check that the sensor is powered on and connected to Wi-Fi
-
-**"Connection timed out"**
-- Sensor may be busy or unresponsive
-- Try again after a few seconds
-- Verify network connectivity
-
-**"Data parsing error"**
-- Sensor may be returning unexpected data format
-- Try refreshing the connection
-- Ensure you're connecting to a PurpleAir sensor
-
-### Network Requirements
-
-- Both your iOS device and PurpleAir sensor must be on the same local network
-- No internet connection required for monitoring (local network only)
-- Router must allow communication between devices (check AP isolation settings)
-
-## Development
-
-### Project Structure
-
-```
-PurpleAir LAN/
-├── PurpleAirLANApp.swift          # App entry point
-├── ContentView.swift              # Main navigation
-├── Views/
-│   ├── ConfigurationView.swift    # Sensor setup
-│   ├── DashboardView.swift        # Data display
-│   └── Components/
-│       ├── DataTile.swift         # Individual data tiles
-│       └── WeatherSpinner.swift   # Loading animation
-├── Models/
-│   └── PurpleAirData.swift        # Data model
-└── Services/
-    └── PurpleAirService.swift     # Network service
-```
-
-### Building
-
-1. Open the project in Xcode
-2. Select your target device or simulator
-3. Press `Cmd+R` to build and run
-
-### Testing
-
-- Use the connection test feature in the app
-- Verify sensor connectivity before deploying
-- Test with different network conditions
+- **"Cannot find sensor at this address"** — confirm the device is on the same
+  Wi-Fi as the sensor and the address is right; watch out for router AP/client
+  isolation, which blocks device-to-device traffic.
+- **Menu bar shows the ghost icon at home** — open the panel (that kicks an
+  immediate probe) or check the address in the gear menu.
+- **Pressure card says "Gathering pressure history…"** — expected: the 3-hour
+  trend needs ~2 hours of samples before it can show rising/falling.
 
 ## Privacy
 
-This app:
-- Only connects to sensors on your local network
-- Does not send data to external servers
-- Stores only the sensor hostname/IP locally on your device
-- Does not collect or transmit personal information
-
-## License
-
-This project is open source. See the LICENSE file for details.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## Support
-
-For issues or questions:
-- Check the troubleshooting section above
-- Review PurpleAir sensor documentation
-- Ensure proper network configuration
-
----
-
-**Note**: This app is designed for local network monitoring only. It does not replace the official PurpleAir app for internet-based monitoring or sensor management.
+Local network only. Nothing leaves your LAN, no analytics, no accounts; the only
+thing stored is the sensor address (and a few hours of pressure samples for the
+trend), on-device.
