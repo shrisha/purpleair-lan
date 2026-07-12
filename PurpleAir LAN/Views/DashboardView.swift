@@ -221,6 +221,8 @@ struct DashboardView: View {
         .padding(.top, 8)
         .padding(.trailing, 16)
         .opacity(chromeVisible ? 1 : 0)
+        .allowsHitTesting(chromeVisible)
+        .accessibilityHidden(!chromeVisible)
     }
 
     private func showChrome() {
