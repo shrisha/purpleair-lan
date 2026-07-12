@@ -4,24 +4,12 @@
 <dict>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+		<!-- Sensor hostname is user-configurable and LAN sensors serve plain HTTP,
+		     so a per-domain exception is not possible. Do not add narrower keys
+		     (e.g. NSAllowsLocalNetworking) alongside this one: their presence makes
+		     iOS 10+ ignore NSAllowsArbitraryLoads entirely. -->
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
-		<key>NSAllowsArbitraryLoadsInWebContent</key>
-		<true/>
-		<key>NSAllowsArbitraryLoadsUsageDescription</key>
-		<dict/>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>purple.air</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSExceptionMinimumTLSVersion</key>
-				<string>1.0</string>
-			</dict>
-		</dict>
 	</dict>
 </dict>
 </plist>

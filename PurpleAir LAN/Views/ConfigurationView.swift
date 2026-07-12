@@ -49,29 +49,40 @@ struct ConfigurationView: View {
                         .font(.headline)
                         .fontWeight(.semibold)
                     
-                    Text("Enter the hostname or IP address of your PurpleAir sensor:")
+                    Text("Enter the hostname or IP address of your PurpleAir sensor — no http:// prefix needed:")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                    
+
                     // Hostname input field
                     VStack(alignment: .leading, spacing: 8) {
-                        TextField("purple.air or 192.168.1.100", text: $hostnameInput)
+                        TextField("purpleair.lan or 192.168.1.100", text: $hostnameInput)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .autocapitalization(.none)
                             .autocorrectionDisabled()
                             .keyboardType(.URL)
+                            .onChange(of: hostnameInput) { newValue in
+                                // Be forgiving with pasted URLs: strip the scheme
+                                let stripped = strippingScheme(newValue)
+                                if stripped != newValue {
+                                    hostnameInput = stripped
+                                }
+                            }
                             .onSubmit {
                                 if !hostnameInput.isEmpty {
                                     testConnection()
                                 }
                             }
-                        
+
                         // Validation hint
                         if !hostnameInput.isEmpty && !isValidHostname(hostnameInput) {
                             Text("Please enter a valid hostname or IP address")
                                 .font(.caption)
                                 .foregroundColor(.red)
                         }
+
+                        Text("The app connects over plain HTTP on your local network.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
                 
@@ -178,6 +189,15 @@ private extension ConfigurationView {
         sensorHostname = hostnameInput.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
+    /// Remove a leading http:// or https:// scheme from user input
+    func strippingScheme(_ input: String) -> String {
+        var result = input
+        for scheme in ["http://", "https://"] where result.lowercased().hasPrefix(scheme) {
+            result = String(result.dropFirst(scheme.count))
+        }
+        return result
+    }
+
     /// Validate hostname format
     func isValidHostname(_ hostname: String) -> Bool {
         let trimmed = hostname.trimmingCharacters(in: .whitespacesAndNewlines)

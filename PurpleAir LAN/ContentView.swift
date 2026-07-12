@@ -12,6 +12,7 @@ struct ContentView: View {
             } else {
                 // Show dashboard with sensor data
                 DashboardView(hostname: sensorHostname)
+                    .id(sensorHostname)
             }
         }
         .navigationViewStyle(StackNavigationViewStyle()) // Prevents split view on iPad
