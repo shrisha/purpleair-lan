@@ -9,8 +9,7 @@ struct PurpleAirBarApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            Text("Panel arrives in the next task")
-                .padding()
+            PanelView()
         } label: {
             MenuBarLabel()
         }
