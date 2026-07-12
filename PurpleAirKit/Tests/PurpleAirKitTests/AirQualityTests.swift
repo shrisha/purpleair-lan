@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import PurpleAir_LAN
+@testable import PurpleAirKit
 
 // MARK: May-2024 EPA breakpoints
 @Test func aqiGoodUpperEdge() { #expect(AirQuality.aqi(fromCorrectedPM25: 9.0) == 50) }

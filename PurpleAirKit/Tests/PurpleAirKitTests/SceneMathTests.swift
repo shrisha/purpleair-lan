@@ -1,7 +1,7 @@
 // PurpleAir LANTests/SceneMathTests.swift
 import Testing
 import Foundation
-@testable import PurpleAir_LAN
+@testable import PurpleAirKit
 
 private func utcDate(_ y: Int, _ mo: Int, _ d: Int, _ h: Int, _ mi: Int = 0) -> Date {
     var c = DateComponents()
