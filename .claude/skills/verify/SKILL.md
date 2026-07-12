@@ -36,10 +36,13 @@ xcrun simctl io booted screenshot out.png
 - Hostname persists in `@AppStorage("sensorHostname")`. `simctl spawn booted defaults
   delete` does NOT clear it (cfprefsd caches; domain lives in the app container).
   To force the setup screen, `simctl uninstall` + reinstall.
-- To seed a hostname without UI typing: terminate app, then
-  `plutil -replace sensorHostname -string <value>
-  "$(xcrun simctl get_app_container booted com.sr.PurpleAir-LAN data)/Library/Preferences/com.sr.PurpleAir-LAN.plist"`,
-  relaunch.
+- Seeding a hostname by `plutil -replace` on the container plist is UNRELIABLE —
+  cfprefsd caches across terminate/relaunch and sometimes even uninstall/reinstall.
+  Reliable recipe: `terminate` → `uninstall` → `install` → create the plist fresh
+  BEFORE first launch (`plutil -create xml1 <plist>` then
+  `plutil -insert sensorHostname -string <value> <plist>` in
+  `$(xcrun simctl get_app_container booted com.sr.PurpleAir-LAN data)/Library/Preferences/com.sr.PurpleAir-LAN.plist`)
+  → `launch`.
 - No cliclick / no assistive access for osascript in this environment — simulator
   taps/typing can't be scripted directly. A `PurpleAir LANUITests` UI-test target
   exists (filesystem-synchronized, no sources on disk yet); create sources under
