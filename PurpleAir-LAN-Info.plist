@@ -11,5 +11,12 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<!-- The wallpaper scene is always dark; iOS 26's adaptive status bar fails to
+	     flip the clock cluster over it (preferredColorScheme alone is not enough),
+	     so pin light status-bar content app-wide. -->
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 </dict>
 </plist>

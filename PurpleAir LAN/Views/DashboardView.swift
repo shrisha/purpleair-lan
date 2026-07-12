@@ -37,6 +37,7 @@ struct DashboardView: View {
             }
         }
         .environment(\.colorScheme, .dark)
+        .preferredColorScheme(.dark) // styles the status bar light-on-dark to match the scene
         .persistentSystemOverlays(.hidden)
         .toolbar(.hidden, for: .navigationBar)
         .contentShape(Rectangle())
