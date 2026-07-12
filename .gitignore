@@ -7,3 +7,4 @@ xcuserdata/
 # Build artifacts
 build/
 DerivedData/
+.build/

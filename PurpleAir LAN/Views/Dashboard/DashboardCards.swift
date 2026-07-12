@@ -1,4 +1,5 @@
 import SwiftUI
+import PurpleAirKit
 
 /// Full-width card: corrected PM2.5, EPA scale bar, health guidance.
 struct PMCard: View {

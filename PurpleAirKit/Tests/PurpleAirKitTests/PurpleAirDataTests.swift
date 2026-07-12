@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import PurpleAir_LAN
+@testable import PurpleAirKit
 
 private let fixtureJSON = """
 {

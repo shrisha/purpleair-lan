@@ -2,34 +2,34 @@
 import SwiftUI
 
 /// Linear-RGB triple used for palette math (SwiftUI Color is opaque).
-struct RGB: Equatable {
-    let r: Double
-    let g: Double
-    let b: Double
+public struct RGB: Equatable {
+    public let r: Double
+    public let g: Double
+    public let b: Double
 
-    init(r: Double, g: Double, b: Double) {
+    public init(r: Double, g: Double, b: Double) {
         self.r = r; self.g = g; self.b = b
     }
 
-    init(hex: UInt32) {
+    public init(hex: UInt32) {
         r = Double((hex >> 16) & 0xFF) / 255
         g = Double((hex >> 8) & 0xFF) / 255
         b = Double(hex & 0xFF) / 255
     }
 
-    func mixed(with other: RGB, amount: Double) -> RGB {
+    public func mixed(with other: RGB, amount: Double) -> RGB {
         let t = min(max(amount, 0), 1)
         if t == 0 { return self }
         if t == 1 { return other }
         return RGB(r: r + (other.r - r) * t, g: g + (other.g - g) * t, b: b + (other.b - b) * t)
     }
 
-    var color: Color { Color(red: r, green: g, blue: b) }
+    public var color: Color { Color(red: r, green: g, blue: b) }
 }
 
 /// The wallpaper's palette: continuous in AQI (anchored at band midpoints),
 /// blended day/night by the solar factors, warmed at the horizon in twilight.
-enum ScenePalette {
+public enum ScenePalette {
     /// Day anchors [top, upper, lower, horizon] per EPA band.
     private static let day: [[RGB]] = [
         [RGB(hex: 0x123A8C), RGB(hex: 0x2E63C4), RGB(hex: 0x5E93DB), RGB(hex: 0xA8CDEE)], // Good — serene sky
@@ -56,7 +56,7 @@ enum ScenePalette {
     /// AQI values at which each band's palette applies exactly.
     private static let bandMidpoints: [Double] = [25, 75, 125, 175, 250, 400]
 
-    static func anchors(aqi: Double, daylight: Double, twilight: Double) -> [RGB] {
+    public static func anchors(aqi: Double, daylight: Double, twilight: Double) -> [RGB] {
         // continuous band position from AQI
         let (lower, upper, t) = bandBlend(aqi: aqi)
         return (0..<4).map { i in
@@ -71,7 +71,7 @@ enum ScenePalette {
     }
 
     /// Row-major 3×3 colors for MeshGradient: top row, mid row, horizon row.
-    static func meshColors(aqi: Double, daylight: Double, twilight: Double) -> [Color] {
+    public static func meshColors(aqi: Double, daylight: Double, twilight: Double) -> [Color] {
         let p = anchors(aqi: aqi, daylight: daylight, twilight: twilight)
         return [
             p[0].color, p[0].mixed(with: p[1], amount: 0.3).color, p[0].color,

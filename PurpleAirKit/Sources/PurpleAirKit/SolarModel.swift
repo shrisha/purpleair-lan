@@ -4,8 +4,8 @@ import Foundation
 /// Approximate solar position (NOAA simplified equations) driving the
 /// scene's day/night blend. Falls back to a local-clock curve when the
 /// sensor reports no coordinates.
-enum SolarModel {
-    static func factors(date: Date, latitude: Double?, longitude: Double?) -> (daylight: Double, twilight: Double) {
+public enum SolarModel {
+    public static func factors(date: Date, latitude: Double?, longitude: Double?) -> (daylight: Double, twilight: Double) {
         guard let latitude, let longitude else { return clockFactors(date: date) }
         let elev = solarElevationDegrees(date: date, latitude: latitude, longitude: longitude)
         let daylight = smoothstep(-6, 12, elev)
@@ -13,7 +13,7 @@ enum SolarModel {
         return (daylight, twilight)
     }
 
-    static func solarElevationDegrees(date: Date, latitude: Double, longitude: Double) -> Double {
+    public static func solarElevationDegrees(date: Date, latitude: Double, longitude: Double) -> Double {
         var cal = Calendar(identifier: .gregorian)
         cal.timeZone = TimeZone(identifier: "UTC")!
         let dayOfYear = Double(cal.ordinality(of: .day, in: .year, for: date) ?? 1)

@@ -1,10 +1,10 @@
 import SwiftUI
 
 /// EPA AQI category per the May-2024 PM2.5 breakpoints.
-enum AQICategory: Int, CaseIterable {
+public enum AQICategory: Int, CaseIterable {
     case good, moderate, unhealthySensitive, unhealthy, veryUnhealthy, hazardous
 
-    var name: String {
+    public var name: String {
         switch self {
         case .good: "Good"
         case .moderate: "Moderate"
@@ -16,7 +16,7 @@ enum AQICategory: Int, CaseIterable {
     }
 
     /// Official EPA/AirNow category colors.
-    var epaColor: Color {
+    public var epaColor: Color {
         switch self {
         case .good: Color(red: 0 / 255, green: 228 / 255, blue: 0 / 255)
         case .moderate: Color(red: 255 / 255, green: 255 / 255, blue: 0 / 255)
@@ -27,7 +27,7 @@ enum AQICategory: Int, CaseIterable {
         }
     }
 
-    var healthGuidance: String {
+    public var healthGuidance: String {
         switch self {
         case .good: "Air quality is satisfactory, and poses little or no risk."
         case .moderate: "Acceptable air. Unusually sensitive people should consider limiting prolonged exertion."
@@ -40,14 +40,21 @@ enum AQICategory: Int, CaseIterable {
 }
 
 /// A fully derived air-quality reading: EPA-corrected concentration + AQI.
-struct AQIReading: Equatable {
-    let aqi: Int
-    let category: AQICategory
-    let correctedPM25: Double
-    let channelsAgree: Bool
+public struct AQIReading: Equatable {
+    public let aqi: Int
+    public let category: AQICategory
+    public let correctedPM25: Double
+    public let channelsAgree: Bool
+
+    public init(aqi: Int, category: AQICategory, correctedPM25: Double, channelsAgree: Bool) {
+        self.aqi = aqi
+        self.category = category
+        self.correctedPM25 = correctedPM25
+        self.channelsAgree = channelsAgree
+    }
 }
 
-enum AirQuality {
+public enum AirQuality {
     // MARK: AQI (EPA May-2024 PM2.5 breakpoints)
 
     private static let breakpoints: [(cLo: Double, cHi: Double, aLo: Double, aHi: Double)] = [
@@ -59,14 +66,14 @@ enum AirQuality {
         (225.5, 325.4, 301, 500),
     ]
 
-    static func aqi(fromCorrectedPM25 concentration: Double) -> Int {
+    public static func aqi(fromCorrectedPM25 concentration: Double) -> Int {
         let c = (max(concentration, 0) * 10).rounded(.down) / 10 // EPA: truncate to 0.1
         guard let bp = breakpoints.first(where: { c <= $0.cHi }) else { return 500 }
         let value = (bp.aHi - bp.aLo) / (bp.cHi - bp.cLo) * (c - bp.cLo) + bp.aLo
         return min(Int(value.rounded()), 500)
     }
 
-    static func category(forAQI aqi: Int) -> AQICategory {
+    public static func category(forAQI aqi: Int) -> AQICategory {
         switch aqi {
         case ...50: .good
         case ...100: .moderate
@@ -79,7 +86,7 @@ enum AirQuality {
 
     // MARK: EPA (Barkjohn 2021 + Fire & Smoke Map extension) correction
 
-    static func epaCorrectedPM25(rawCF1 pa: Double, humidity: Double) -> Double {
+    public static func epaCorrectedPM25(rawCF1 pa: Double, humidity: Double) -> Double {
         let rh = min(max(humidity, 0), 100)
         let corrected: Double
         switch pa {
@@ -102,14 +109,14 @@ enum AirQuality {
 
     // MARK: channel QC (EPA Fire & Smoke Map rule)
 
-    static func channelsAgree(_ a: Double, _ b: Double) -> Bool {
+    public static func channelsAgree(_ a: Double, _ b: Double) -> Bool {
         let diff = abs(a - b)
         if diff < 5 { return true }
         let mean = (a + b) / 2
         return mean > 0 && diff / mean < 0.7
     }
 
-    static func reading(pmA: Double, pmB: Double?, rawHumidity: Double) -> AQIReading {
+    public static func reading(pmA: Double, pmB: Double?, rawHumidity: Double) -> AQIReading {
         let merged: Double
         let agree: Bool
         if let pmB {
@@ -131,12 +138,12 @@ enum AirQuality {
 
     // MARK: display corrections (sensor self-heating biases)
 
-    static func displayTemperatureF(rawF: Double) -> Double { rawF - 8 }
+    public static func displayTemperatureF(rawF: Double) -> Double { rawF - 8 }
 
-    static func displayHumidity(raw: Double) -> Double { min(raw + 4, 100) }
+    public static func displayHumidity(raw: Double) -> Double { min(raw + 4, 100) }
 
     /// Magnus formula; inputs are the *corrected* display temperature/humidity.
-    static func dewPointF(temperatureF: Double, humidity: Double) -> Double {
+    public static func dewPointF(temperatureF: Double, humidity: Double) -> Double {
         let t = (temperatureF - 32) / 1.8
         let rh = min(max(humidity, 1), 100)
         let gamma = log(rh / 100) + 17.625 * t / (243.04 + t)
@@ -144,7 +151,7 @@ enum AirQuality {
         return dewC * 1.8 + 32
     }
 
-    static func comfortDescription(humidity: Double) -> String {
+    public static func comfortDescription(humidity: Double) -> String {
         switch humidity {
         case ..<30: "Dry"
         case ...60: "Comfortable"

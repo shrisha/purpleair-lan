@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9D8B08FE2E407FE800541770 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 9D8B08FD2E407FE800541770 /* README.md */; };
+		AA0000000000000000000112 /* PurpleAirKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000111 /* PurpleAirKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0000000000000000000112 /* PurpleAirKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +114,7 @@
 			);
 			name = "PurpleAir LAN";
 			packageProductDependencies = (
+				AA0000000000000000000111 /* PurpleAirKit */,
 			);
 			productName = "PurpleAir LAN";
 			productReference = 9D8B08972E405EBB00541770 /* PurpleAir LAN.app */;
@@ -191,6 +194,9 @@
 				Base,
 			);
 			mainGroup = 9D8B088E2E405EBB00541770;
+			packageReferences = (
+				AA0000000000000000000110 /* XCLocalSwiftPackageReference "PurpleAirKit" */,
+			);
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9D8B08982E405EBB00541770 /* Products */;
@@ -393,6 +399,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TJQYV4VG7P;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "PurpleAir-LAN-Info.plist";
@@ -421,6 +428,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = TJQYV4VG7P;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "PurpleAir-LAN-Info.plist";
@@ -550,6 +558,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AA0000000000000000000110 /* XCLocalSwiftPackageReference "PurpleAirKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = PurpleAirKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA0000000000000000000111 /* PurpleAirKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PurpleAirKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9D8B088F2E405EBB00541770 /* Project object */;
 }

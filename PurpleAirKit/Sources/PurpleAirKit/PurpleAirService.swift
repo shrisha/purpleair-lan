@@ -2,7 +2,7 @@ import Foundation
 import Combine
 
 // MARK: - API Service States
-enum APIState {
+public enum APIState {
     case idle
     case loading
     case loaded(PurpleAirData)
@@ -11,18 +11,18 @@ enum APIState {
 
 // MARK: - PurpleAir API Service
 @MainActor
-class PurpleAirService: ObservableObject {
+public final class PurpleAirService: ObservableObject {
     // Published state for SwiftUI binding
-    @Published var state: APIState = .idle
-    
+    @Published public var state: APIState = .idle
+
     // URLSession for network requests
     private let urlSession: URLSession
-    
+
     // JSON decoder configured for PurpleAir API
     private let decoder: JSONDecoder
-    
+
     // Initialize service with optional custom URLSession (useful for testing)
-    init(urlSession: URLSession = .shared) {
+    public init(urlSession: URLSession = .shared) {
         self.urlSession = urlSession
         
         // Configure JSON decoder
@@ -32,7 +32,7 @@ class PurpleAirService: ObservableObject {
     
     /// Fetch sensor data from the specified hostname
     /// - Parameter hostname: The IP address or hostname of the PurpleAir sensor
-    func fetchSensorData(from hostname: String) async {
+    public func fetchSensorData(from hostname: String) async {
         // Update state to loading
         state = .loading
         
@@ -153,31 +153,31 @@ private extension PurpleAirService {
 // MARK: - Convenience Methods
 extension PurpleAirService {
     /// Check if we have valid sensor data
-    var hasData: Bool {
+    public var hasData: Bool {
         if case .loaded = state {
             return true
         }
         return false
     }
-    
+
     /// Get current sensor data if available
-    var currentData: PurpleAirData? {
+    public var currentData: PurpleAirData? {
         if case .loaded(let data) = state {
             return data
         }
         return nil
     }
-    
+
     /// Check if currently loading
-    var isLoading: Bool {
+    public var isLoading: Bool {
         if case .loading = state {
             return true
         }
         return false
     }
-    
+
     /// Get current error message if in error state
-    var errorMessage: String? {
+    public var errorMessage: String? {
         if case .error(let message) = state {
             return message
         }

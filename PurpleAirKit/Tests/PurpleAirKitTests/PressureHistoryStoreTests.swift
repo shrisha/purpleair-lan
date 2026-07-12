@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import PurpleAir_LAN
+@testable import PurpleAirKit
 
 private func makeStore(clock: @escaping () -> Date) -> PressureHistoryStore {
     let defaults = UserDefaults(suiteName: "pressure-test-\(UUID().uuidString)")!

@@ -3,11 +3,18 @@ import SwiftUI
 /// The full-bleed living wallpaper: a slow-drifting mesh gradient whose
 /// palette follows AQI band and sun position, haze motes whose density
 /// follows PM2.5, and stars on clean nights.
-struct AmbientSceneView: View {
+public struct AmbientSceneView: View {
     let aqi: Double
     let pm25: Double
     let latitude: Double?
     let longitude: Double?
+
+    public init(aqi: Double, pm25: Double, latitude: Double?, longitude: Double?) {
+        self.aqi = aqi
+        self.pm25 = pm25
+        self.latitude = latitude
+        self.longitude = longitude
+    }
 
     private struct Mote {
         let x: Double, y: Double, radius: Double, speed: Double, phase: Double
@@ -41,7 +48,7 @@ struct AmbientSceneView: View {
         return result
     }
 
-    var body: some View {
+    public var body: some View {
         TimelineView(.animation(minimumInterval: 1 / 20)) { timeline in
             let t = timeline.date.timeIntervalSinceReferenceDate
             let sun = SolarModel.factors(date: timeline.date, latitude: latitude, longitude: longitude)

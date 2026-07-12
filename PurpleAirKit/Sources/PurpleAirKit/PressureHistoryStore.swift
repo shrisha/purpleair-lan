@@ -1,11 +1,11 @@
 import Foundation
 
-enum PressureTrend: Equatable {
+public enum PressureTrend: Equatable {
     case rising(rapid: Bool)
     case falling(rapid: Bool)
     case steady
 
-    var symbolName: String {
+    public var symbolName: String {
         switch self {
         case .rising: "arrow.up"
         case .falling: "arrow.down"
@@ -13,7 +13,7 @@ enum PressureTrend: Equatable {
         }
     }
 
-    var footnote: String {
+    public var footnote: String {
         switch self {
         case .rising(true): "Rising rapidly over the last 3 hours."
         case .rising(false): "Rising over the last 3 hours."
@@ -26,7 +26,7 @@ enum PressureTrend: Equatable {
 
 /// Persists recent barometric samples and derives the 3-hour trend
 /// (meteorological convention: ±1 hPa/3 h = rising/falling, ±3 = rapidly).
-final class PressureHistoryStore {
+public final class PressureHistoryStore {
     private struct Sample: Codable {
         let date: Date
         let hPa: Double
@@ -41,7 +41,7 @@ final class PressureHistoryStore {
     private let now: () -> Date
     private var samples: [Sample]
 
-    init(defaults: UserDefaults = .standard, now: @escaping () -> Date = Date.init) {
+    public init(defaults: UserDefaults = .standard, now: @escaping () -> Date = Date.init) {
         self.defaults = defaults
         self.now = now
         if let data = defaults.data(forKey: Self.storageKey),
@@ -52,7 +52,7 @@ final class PressureHistoryStore {
         }
     }
 
-    func record(_ hPa: Double) {
+    public func record(_ hPa: Double) {
         let cutoff = now().addingTimeInterval(-Self.window)
         samples.append(Sample(date: now(), hPa: hPa))
         samples.removeAll { $0.date < cutoff }
@@ -61,7 +61,7 @@ final class PressureHistoryStore {
         }
     }
 
-    var trend: PressureTrend? {
+    public var trend: PressureTrend? {
         guard let latest = samples.last else { return nil }
         let target = latest.date.addingTimeInterval(-Self.trendSpan)
         // reference = sample closest to 3 h ago; needs ≥2 h of real span
