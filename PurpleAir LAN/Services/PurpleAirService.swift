@@ -110,8 +110,8 @@ private extension PurpleAirService {
         // Validate that we have a non-empty hostname
         guard !cleanHostname.isEmpty else { return nil }
         
-        // Construct the URL with the live data endpoint
-        let urlString = "http://\(cleanHostname)/json?live=true"
+        // Firmware's 2-minute average — the right smoothing for an ambient display
+        let urlString = "http://\(cleanHostname)/json"
         return URL(string: urlString)
     }
     
